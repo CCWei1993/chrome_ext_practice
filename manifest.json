@@ -1,0 +1,11 @@
+{
+    "name": "Stock",
+    "version": "1.0.0",
+    "description": "stock information",
+    "manifest_version": 3,
+    "author": "xxx",
+    "action": {
+        "default_popup": "index.html",
+        "default_title": "stock information"
+    }
+}
