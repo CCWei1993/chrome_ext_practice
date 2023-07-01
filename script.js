@@ -10,10 +10,11 @@ async function fetchData() {
     const tableObject = document.getElementById("mytable");
 
     var rowCount = tableObject.rows.length - 1;
+    var respLen = (record["msgArray"]) ? record.msgArray.length : 0;
 
-    while (rowCount != record.msgArray.length) {
+    while (rowCount != respLen) {
 
-        if (rowCount > record.msgArray.length) {
+        if (rowCount > respLen) {
             tableObject.deleteRow(rowCount--);
         }
         else {
@@ -56,6 +57,35 @@ function addRow() {
     cell6.innerHTML = rowCount;
 }
 
+
+function add() {
+    let _companyid = "tse_" + document.getElementById('textbox_id').value + ".tw";
+    var _flag = true;
+    for (var i = 0; i < list.length; i++) {
+        if (list[i] === _companyid) {
+            _flag = false;
+            break;
+        }
+    }
+    if (_flag) list.push(_companyid);
+    else console.log("duplicate");
+    clearInputBox();
+}
+
+function _delete() {
+    let _companyid = "tse_" + document.getElementById('textbox_id').value + ".tw";
+    for (var i = 0; i < list.length; i++) {
+        if (list[i] === _companyid) {
+            list.splice(i, 1);
+        }
+    }
+    clearInputBox();
+}
+
+function clearInputBox() {
+    document.getElementById('textbox_id').value = "";
+}
+
 fetchData();
 
 var inverval_timer;
@@ -70,29 +100,3 @@ inverval_timer = setInterval(function () {
 function stop_timer() {
     clearInterval(inverval_timer);
 }
-
-function add() {
-    let _companyid = "tse_" + document.getElementById('textbox_id').value + ".tw";
-    var _flag = true;
-    for (var i = 0; i < list.length; i++) {
-        if (list[i] === _companyid) {
-            _flag = false;
-            break;
-        }
-    }
-    if (_flag) list.push(_companyid);
-    else console.log("duplicate");
-}
-
-function _delete() {
-    let _companyid = document.getElementById('textbox_id').value;
-    for (var i = 0; i < list.length; i++) {
-        if (list[i] === _companyid) {
-            list.splice(i, 1);
-        }
-    }
-}
-
-// function clearInputBox() {
-
-// }
