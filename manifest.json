@@ -8,6 +8,14 @@
         "default_popup": "index.html",
         "default_title": "stock information"
     },
+    "background": {
+        "service_worker": "background.js"
+    },
+    "permissions": [
+        "alarms",
+        "notifications",
+        "storage"
+    ],
     "host_permissions": [
         "https://mis.twse.com.tw/"
     ]

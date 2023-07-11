@@ -3,40 +3,47 @@ document.getElementById("add").addEventListener("click", add);
 document.getElementById("delete").addEventListener("click", _delete);
 async function fetchData() {
 
-    const url = "https://mis.twse.com.tw/stock/api/getStockInfo.jsp?ex_ch=";
-    const res = await fetch(url + list.join('|'));
-    const record = await res.json();
+    // const url = "https://mis.twse.com.tw/stock/api/getStockInfo.jsp?ex_ch=";
+    // const res = await fetch(url + list.join('|'));
+    // const record = await res.json();
+    var record;
+    chrome.storage.local.get(["data"]).then((result) => {
+        record = result.data;
 
-    const tableObject = document.getElementById("mytable");
 
-    var rowCount = tableObject.rows.length - 1;
-    var respLen = (record["msgArray"]) ? record.msgArray.length : 0;
+        const tableObject = document.getElementById("mytable");
 
-    while (rowCount != respLen) {
+        var rowCount = tableObject.rows.length - 1;
+        var respLen = (record["msgArray"]) ? record.msgArray.length : 0;
 
-        if (rowCount > respLen) {
-            tableObject.deleteRow(rowCount--);
+        while (rowCount != respLen) {
+
+            if (rowCount > respLen) {
+                tableObject.deleteRow(rowCount--);
+            }
+            else {
+                addRow();
+                rowCount++;
+            }
         }
-        else {
-            addRow();
-            rowCount++;
-        }
-    }
 
-    for (let i = 0; i < record.msgArray.length; i++) {
-        let cur_price = record.msgArray[i].z === '-' ? Number(record.msgArray[i].z.split('_')[0]) : record.msgArray[i].z;
-        tableObject.rows[i + 1].cells[0].innerHTML = record.msgArray[i].c;
-        tableObject.rows[i + 1].cells[1].innerHTML = record.msgArray[i].n;
-        tableObject.rows[i + 1].cells[2].innerHTML = record.msgArray[i].v;
-        tableObject.rows[i + 1].cells[3].innerHTML = cur_price;
-        tableObject.rows[i + 1].cells[4].innerHTML = record.msgArray[i].y;
-        tableObject.rows[i + 1].cells[5].innerHTML = (cur_price - record.msgArray[i].y) / record.msgArray[i].y;
-    }
-    // document.getElementById("companyId").innerHTML = record.msgArray[0].c;
-    // document.getElementById("companyName").innerHTML = record.msgArray[0].n;
-    // document.getElementById("Volume").innerHTML = record.msgArray[0].v;
-    // document.getElementById("curPrice").innerHTML = record.msgArray[0].z;
-    // document.getElementById("yesClose").innerHTML = record.msgArray[0].y;
+        for (let i = 0; i < record.msgArray.length; i++) {
+            let cur_price = record.msgArray[i].z === '-' ? Number(record.msgArray[i].z.split('_')[0]) : record.msgArray[i].z;
+            tableObject.rows[i + 1].cells[0].innerHTML = record.msgArray[i].c;
+            tableObject.rows[i + 1].cells[1].innerHTML = record.msgArray[i].n;
+            tableObject.rows[i + 1].cells[2].innerHTML = record.msgArray[i].v;
+            tableObject.rows[i + 1].cells[3].innerHTML = cur_price;
+            tableObject.rows[i + 1].cells[4].innerHTML = record.msgArray[i].y;
+            tableObject.rows[i + 1].cells[5].innerHTML = (cur_price - record.msgArray[i].y) / record.msgArray[i].y;
+        }
+        // document.getElementById("companyId").innerHTML = record.msgArray[0].c;
+        // document.getElementById("companyName").innerHTML = record.msgArray[0].n;
+        // document.getElementById("Volume").innerHTML = record.msgArray[0].v;
+        // document.getElementById("curPrice").innerHTML = record.msgArray[0].z;
+        // document.getElementById("yesClose").innerHTML = record.msgArray[0].y;
+
+
+    });
 }
 
 function addRow() {
@@ -59,41 +66,63 @@ function addRow() {
 
 
 function add() {
-    let _companyid = "tse_" + document.getElementById('textbox_id').value + ".tw";
-    var _flag = true;
-    for (var i = 0; i < list.length; i++) {
-        if (list[i] === _companyid) {
-            _flag = false;
-            break;
+    let options = {
+        type: 'basic',
+        title: 'Basic Notification',
+        message: 'This is a Basic Notification',
+        iconUrl: chrome.runtime.getURL('icon/icon.png')
+    };
+    chrome.notifications.create(options);
+
+    chrome.storage.local.get(["list"]).then((result) => {
+        let list = result.list;
+        let _companyid = "tse_" + document.getElementById('textbox_id').value + ".tw";
+        var _flag = true;
+        for (var i = 0; i < list.length; i++) {
+            if (list[i] === _companyid) {
+                _flag = false;
+                break;
+            }
         }
-    }
-    if (_flag) list.push(_companyid);
-    else console.log("duplicate");
-    clearInputBox();
+        if (_flag) list.push(_companyid);
+        else console.log("duplicate");
+
+        chrome.storage.local.set({ "list": list }).then(() => {
+            console.log("Value is set");
+        });
+
+        clearInputBox();
+    });
 }
 
 function _delete() {
-    let _companyid = "tse_" + document.getElementById('textbox_id').value + ".tw";
-    for (var i = 0; i < list.length; i++) {
-        if (list[i] === _companyid) {
-            list.splice(i, 1);
+
+    chrome.storage.local.get(["list"]).then((result) => {
+        let list = result.list;
+        let _companyid = "tse_" + document.getElementById('textbox_id').value + ".tw";
+        for (var i = 0; i < list.length; i++) {
+            if (list[i] === _companyid) {
+                list.splice(i, 1);
+            }
         }
-    }
-    clearInputBox();
+        chrome.storage.local.set({ "list": list }).then(() => {
+            console.log("Value is set");
+        });
+        clearInputBox();
+    });
 }
 
 function clearInputBox() {
     document.getElementById('textbox_id').value = "";
 }
 
-fetchData();
+// fetchData();
 
 var inverval_timer;
 
 //Time in milliseconds [1 second = 1000 milliseconds ]    
 inverval_timer = setInterval(function () {
     fetchData();
-    console.log("5 seconds completed");
 }, 5000);
 
 //IF you want to stop above timer
