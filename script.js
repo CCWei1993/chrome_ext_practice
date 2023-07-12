@@ -3,18 +3,14 @@ document.getElementById("add").addEventListener("click", add);
 document.getElementById("delete").addEventListener("click", _delete);
 async function fetchData() {
 
-    // const url = "https://mis.twse.com.tw/stock/api/getStockInfo.jsp?ex_ch=";
-    // const res = await fetch(url + list.join('|'));
-    // const record = await res.json();
     var record;
     chrome.storage.local.get(["data"]).then((result) => {
         record = result.data;
 
-
         const tableObject = document.getElementById("mytable");
 
         var rowCount = tableObject.rows.length - 1;
-        var respLen = (record["msgArray"]) ? record.msgArray.length : 0;
+        var respLen = (record) ? record.length : 0;
 
         while (rowCount != respLen) {
 
@@ -27,14 +23,13 @@ async function fetchData() {
             }
         }
 
-        for (let i = 0; i < record.msgArray.length; i++) {
-            let cur_price = record.msgArray[i].z === '-' ? Number(record.msgArray[i].z.split('_')[0]) : record.msgArray[i].z;
-            tableObject.rows[i + 1].cells[0].innerHTML = record.msgArray[i].c;
-            tableObject.rows[i + 1].cells[1].innerHTML = record.msgArray[i].n;
-            tableObject.rows[i + 1].cells[2].innerHTML = record.msgArray[i].v;
-            tableObject.rows[i + 1].cells[3].innerHTML = cur_price;
-            tableObject.rows[i + 1].cells[4].innerHTML = record.msgArray[i].y;
-            tableObject.rows[i + 1].cells[5].innerHTML = (cur_price - record.msgArray[i].y) / record.msgArray[i].y;
+        for (let i = 0; i < record.length; i++) {
+            tableObject.rows[i + 1].cells[0].innerHTML = record[i].c;
+            tableObject.rows[i + 1].cells[1].innerHTML = record[i].n;
+            tableObject.rows[i + 1].cells[2].innerHTML = record[i].v;
+            tableObject.rows[i + 1].cells[3].innerHTML = record[i].curPrice;
+            tableObject.rows[i + 1].cells[4].innerHTML = record[i].y;
+            tableObject.rows[i + 1].cells[5].innerHTML = record[i].priceChange;
         }
         // document.getElementById("companyId").innerHTML = record.msgArray[0].c;
         // document.getElementById("companyName").innerHTML = record.msgArray[0].n;
@@ -66,13 +61,7 @@ function addRow() {
 
 
 function add() {
-    let options = {
-        type: 'basic',
-        title: 'Basic Notification',
-        message: 'This is a Basic Notification',
-        iconUrl: chrome.runtime.getURL('icon/icon.png')
-    };
-    chrome.notifications.create(options);
+
 
     chrome.storage.local.get(["list"]).then((result) => {
         let list = result.list;
