@@ -1,44 +1,35 @@
-var list = ['tse_2330.tw'];
 document.getElementById("add").addEventListener("click", add);
 document.getElementById("delete").addEventListener("click", _delete);
-async function fetchData() {
 
-    var record;
-    chrome.storage.local.get(["data"]).then((result) => {
-        record = result.data;
+async function showData() {
 
-        const tableObject = document.getElementById("mytable");
+    let obj = await chrome.storage.local.get(["data"]);
+    let record = obj.data;
+    const tableObject = document.getElementById("mytable");
 
-        var rowCount = tableObject.rows.length - 1;
-        var respLen = (record) ? record.length : 0;
+    var rowCount = tableObject.rows.length - 1;
+    var respLen = (record) ? record.length : 0;
 
-        while (rowCount != respLen) {
+    while (rowCount != respLen) {
 
-            if (rowCount > respLen) {
-                tableObject.deleteRow(rowCount--);
-            }
-            else {
-                addRow();
-                rowCount++;
-            }
+        if (rowCount > respLen) {
+            tableObject.deleteRow(rowCount--);
         }
-
-        for (let i = 0; i < record.length; i++) {
-            tableObject.rows[i + 1].cells[0].innerHTML = record[i].c;
-            tableObject.rows[i + 1].cells[1].innerHTML = record[i].n;
-            tableObject.rows[i + 1].cells[2].innerHTML = record[i].v;
-            tableObject.rows[i + 1].cells[3].innerHTML = record[i].curPrice;
-            tableObject.rows[i + 1].cells[4].innerHTML = record[i].y;
-            tableObject.rows[i + 1].cells[5].innerHTML = record[i].priceChange;
+        else {
+            addRow();
+            rowCount++;
         }
-        // document.getElementById("companyId").innerHTML = record.msgArray[0].c;
-        // document.getElementById("companyName").innerHTML = record.msgArray[0].n;
-        // document.getElementById("Volume").innerHTML = record.msgArray[0].v;
-        // document.getElementById("curPrice").innerHTML = record.msgArray[0].z;
-        // document.getElementById("yesClose").innerHTML = record.msgArray[0].y;
+    }
 
+    for (let i = 0; i < record.length; i++) {
+        tableObject.rows[i + 1].cells[0].innerHTML = record[i].c;
+        tableObject.rows[i + 1].cells[1].innerHTML = record[i].n;
+        tableObject.rows[i + 1].cells[2].innerHTML = record[i].v;
+        tableObject.rows[i + 1].cells[3].innerHTML = record[i].curPrice;
+        tableObject.rows[i + 1].cells[4].innerHTML = record[i].y;
+        tableObject.rows[i + 1].cells[5].innerHTML = record[i].priceChange;
+    }
 
-    });
 }
 
 function addRow() {
@@ -61,7 +52,6 @@ function addRow() {
 
 
 function add() {
-
 
     chrome.storage.local.get(["list"]).then((result) => {
         let list = result.list;
@@ -101,20 +91,19 @@ function _delete() {
     });
 }
 
+
 function clearInputBox() {
     document.getElementById('textbox_id').value = "";
 }
 
-// fetchData();
+showData();
+chrome.storage.onChanged.addListener(
 
-var inverval_timer;
+    function (changes, areaName) {
 
-//Time in milliseconds [1 second = 1000 milliseconds ]    
-inverval_timer = setInterval(function () {
-    fetchData();
-}, 5000);
-
-//IF you want to stop above timer
-function stop_timer() {
-    clearInterval(inverval_timer);
-}
+        if ("data" in changes) {
+            console.log(changes);
+            showData();
+        }
+    }
+);

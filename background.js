@@ -1,15 +1,13 @@
 
 
-let list = ['tse_2330.tw'];
-chrome.storage.local.set({ "list": list })
+// let list = ['tse_2330.tw'];
+let obj = await chrome.storage.local.get(["list"]);
+chrome.storage.local.set({ "list": ['tse_2330.tw'] })
 
 async function fetchData() {
 
-    // let list = await chrome.storage.local.get(["list"]).list;
-    // chrome.storage.local.get(["list"]).then((result) => {
-    //     list = result.list;
-    // });
-    console.log(list);
+    let obj = await chrome.storage.local.get(["list"]);
+    let list = obj.list;
     const url = "https://mis.twse.com.tw/stock/api/getStockInfo.jsp?ex_ch=";
     const res = await fetch(url + list.join('|'));
     const record = await res.json();
@@ -32,7 +30,7 @@ async function fetchData() {
 
     let notifList = [];
     for (let i = 0; i < data.length; i++) {
-        if (data[i].priceChange > 0) {
+        if (data[i].priceChange > 0.1) {
             notifList.push({ title: data[i].n, message: data[i].curPrice });
         }
     }
@@ -40,7 +38,7 @@ async function fetchData() {
     if (notifList.length > 0) {
         let options = {
             type: 'list',
-            title: 'GOING UP',
+            title: 'stock information',
             message: 'This is a Basic Notification',
             iconUrl: chrome.runtime.getURL('icon/icon.png'),
             items: notifList
@@ -52,6 +50,12 @@ async function fetchData() {
 
 }
 
+let inverval_timer;
+
 setInterval(function () {
     fetchData();
 }, 5000);
+
+function stop_timer() {
+    clearInterval(inverval_timer);
+}
