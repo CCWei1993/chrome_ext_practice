@@ -1,22 +1,34 @@
 
 // let list = ['tse_2330.tw'];
 // let obj = await chrome.storage.local.get(["list"]);
-chrome.storage.local.set({ "state": 'on' })
-chrome.storage.local.set({ "list": ['tse_2330.tw'] }).then(() => {
-    console.log('start');
-});
+
+
+function init() {
+    // chrome.storage.local.set({ "state": 'on' })
+    chrome.storage.local.get(["list"]).then((result) => {
+        console.log(result.list);
+        if (!result.list) {
+            chrome.storage.local.set({ "list": ['tse_2330.tw'] });
+        }
+
+    });
+
+}
+
+init();
 
 async function fetchData() {
 
-    let obj = await chrome.storage.local.get(["list"]);
+    let obj = await chrome.storage.local.get(["list", "threshold"]);
     let list = obj.list;
     const url = "https://mis.twse.com.tw/stock/api/getStockInfo.jsp?ex_ch=";
     const res = await fetch(url + list.join('|'));
     const record = await res.json();
+    const dataLen = record.msgArray ? record.msgArray.length : 0;
 
     let data = [];
 
-    for (let i = 0; i < record.msgArray.length; i++) {
+    for (let i = 0; i < dataLen; i++) {
 
         let cur_price = record.msgArray[i].z === '-' ? Number(record.msgArray[i].b.split('_')[0]) : record.msgArray[i].z;
         data.push({
@@ -30,9 +42,10 @@ async function fetchData() {
 
     }
 
+    let threshold = obj.threshold;
     let notifList = [];
     for (let i = 0; i < data.length; i++) {
-        if (data[i].priceChange > 0.5) {
+        if (data[i].priceChange > threshold) {
             notifList.push({ title: data[i].n, message: data[i].curPrice });
         }
     }
