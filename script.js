@@ -1,5 +1,6 @@
 document.getElementById("add").addEventListener("click", add);
 document.getElementById("delete").addEventListener("click", _delete);
+// document.getElementById("stop").addEventListener("click", stopBackground);
 
 async function showData() {
 
@@ -84,13 +85,15 @@ function _delete() {
                 list.splice(i, 1);
             }
         }
-        chrome.storage.local.set({ "list": list }).then(() => {
-            console.log("Value is set");
-        });
+        chrome.storage.local.set({ "list": list })
         clearInputBox();
     });
 }
 
+function stopBackground() {
+
+    chrome.storage.local.set({ "state": 'off' });
+}
 
 function clearInputBox() {
     document.getElementById('textbox_id').value = "";

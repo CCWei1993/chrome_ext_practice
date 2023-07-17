@@ -1,8 +1,10 @@
 
-
 // let list = ['tse_2330.tw'];
-let obj = await chrome.storage.local.get(["list"]);
-chrome.storage.local.set({ "list": ['tse_2330.tw'] })
+// let obj = await chrome.storage.local.get(["list"]);
+chrome.storage.local.set({ "state": 'on' })
+chrome.storage.local.set({ "list": ['tse_2330.tw'] }).then(() => {
+    console.log('start');
+});
 
 async function fetchData() {
 
@@ -16,7 +18,7 @@ async function fetchData() {
 
     for (let i = 0; i < record.msgArray.length; i++) {
 
-        let cur_price = record.msgArray[i].z === '-' ? Number(record.msgArray[i].z.split('_')[0]) : record.msgArray[i].z;
+        let cur_price = record.msgArray[i].z === '-' ? Number(record.msgArray[i].b.split('_')[0]) : record.msgArray[i].z;
         data.push({
             c: record.msgArray[i].c,
             n: record.msgArray[i].n,
@@ -30,7 +32,7 @@ async function fetchData() {
 
     let notifList = [];
     for (let i = 0; i < data.length; i++) {
-        if (data[i].priceChange > 0.1) {
+        if (data[i].priceChange > 0.5) {
             notifList.push({ title: data[i].n, message: data[i].curPrice });
         }
     }
@@ -52,10 +54,24 @@ async function fetchData() {
 
 let inverval_timer;
 
-setInterval(function () {
+inverval_timer = setInterval(function () {
     fetchData();
 }, 5000);
 
-function stop_timer() {
-    clearInterval(inverval_timer);
-}
+// function stop_timer() {
+//     clearInterval(inverval_timer);
+// }
+
+//
+// chrome.storage.onChanged.addListener(
+
+//     function (changes, areaName) {
+
+//         if ("state" in changes) {
+//             if (changes.state.newValue === 'off') {
+//                 console.log(changes);
+//                 stop_timer();
+//             }
+//         }
+//     }
+// );
