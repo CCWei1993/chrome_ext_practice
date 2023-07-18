@@ -1,8 +1,7 @@
 document.getElementById("add").addEventListener("click", add);
 document.getElementById("delete").addEventListener("click", _delete);
-// document.getElementById("stop").addEventListener("click", stopBackground);
 document.getElementById("threshold-input").addEventListener("change", (event) => {
-    chrome.storage.local.set({ "threshold": event.target.value });
+    chrome.storage.local.set({ "threshold": Number(event.target.value) });
 });
 
 async function showData() {
@@ -108,7 +107,6 @@ chrome.storage.onChanged.addListener(
     function (changes, areaName) {
 
         if ("data" in changes) {
-            console.log(changes);
             showData();
         }
     }

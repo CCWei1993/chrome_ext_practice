@@ -1,12 +1,13 @@
 
-// let list = ['tse_2330.tw'];
-// let obj = await chrome.storage.local.get(["list"]);
-
-
 function init() {
-    // chrome.storage.local.set({ "state": 'on' })
+    chrome.storage.local.set({ "notifList": [] });
+
+    chrome.storage.local.get(["threshold"]).then((result) => {
+        if (!result.threshold) {
+            chrome.storage.local.set({ "threshold": 0.01 });
+        }
+    });
     chrome.storage.local.get(["list"]).then((result) => {
-        console.log(result.list);
         if (!result.list) {
             chrome.storage.local.set({ "list": ['tse_2330.tw'] });
         }
@@ -16,6 +17,25 @@ function init() {
 }
 
 init();
+
+chrome.storage.onChanged.addListener(
+
+    function (changes, areaName) {
+        if ("notifList" in changes) {
+
+            if (changes.notifList.newValue.length > 0) {
+                let options = {
+                    type: 'list',
+                    title: 'stock information',
+                    message: 'This is a Basic Notification',
+                    iconUrl: chrome.runtime.getURL('icon/icon.png'),
+                    items: changes.notifList.newValue
+                };
+                chrome.notifications.create(options);
+            }
+        }
+    }
+);
 
 async function fetchData() {
 
@@ -49,19 +69,7 @@ async function fetchData() {
             notifList.push({ title: data[i].n, message: data[i].curPrice });
         }
     }
-
-    if (notifList.length > 0) {
-        let options = {
-            type: 'list',
-            title: 'stock information',
-            message: 'This is a Basic Notification',
-            iconUrl: chrome.runtime.getURL('icon/icon.png'),
-            items: notifList
-        };
-        chrome.notifications.create(options);
-    }
-
-    chrome.storage.local.set({ "data": data });
+    chrome.storage.local.set({ "notifList": notifList, "data": data });
 
 }
 
@@ -70,21 +78,3 @@ let inverval_timer;
 inverval_timer = setInterval(function () {
     fetchData();
 }, 5000);
-
-// function stop_timer() {
-//     clearInterval(inverval_timer);
-// }
-
-//
-// chrome.storage.onChanged.addListener(
-
-//     function (changes, areaName) {
-
-//         if ("state" in changes) {
-//             if (changes.state.newValue === 'off') {
-//                 console.log(changes);
-//                 stop_timer();
-//             }
-//         }
-//     }
-// );
