@@ -66,7 +66,7 @@ async function fetchData() {
     let notifList = [];
     for (let i = 0; i < data.length; i++) {
         if (data[i].priceChange > threshold) {
-            notifList.push({ title: data[i].n, message: data[i].curPrice });
+            notifList.push({ title: data[i].n, message: data[i].curPrice.toString() });
         }
     }
     chrome.storage.local.set({ "notifList": notifList, "data": data });
