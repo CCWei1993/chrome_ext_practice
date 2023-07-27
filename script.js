@@ -4,6 +4,11 @@ document.getElementById("threshold-input").addEventListener("change", (event) =>
     chrome.storage.local.set({ "threshold": Number(event.target.value) });
 });
 
+chrome.storage.local.get(["threshold"]).then((result) => {
+    document.getElementById('threshold-input').value = result.threshold;
+});
+
+
 async function showData() {
 
     let obj = await chrome.storage.local.get(["data"]);
